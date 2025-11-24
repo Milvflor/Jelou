@@ -78,9 +78,9 @@ curl https://tu-url-orders.trycloudflare.com/api/health
 # 5. Deploy a AWS con variables de producción
 cd lambda-orchestrator
 npm install
-# Temporalmente usa .env.production para el deploy
+# Temporalmente usa .env.example para el deploy
 cp .env .env.backup
-cp .env.production .env
+cp .env.example .env
 npx serverless@3 deploy
 # Restaura .env para desarrollo local
 mv .env.backup .env
@@ -158,7 +158,7 @@ JWT_SECRET=your_jwt_secret_key_change_in_production
 PORT=3000
 ```
 
-**`.env.production` (AWS Lambda):**
+**`.env` (AWS Lambda):**
 ```env
 CUSTOMERS_API_URL=https://tu-url-customers.trycloudflare.com
 ORDERS_API_URL=https://tu-url-orders.trycloudflare.com
@@ -168,7 +168,7 @@ PORT=3000
 
 **Importante**:
 - `JWT_SECRET` debe ser el mismo en todos los servicios para que la validación funcione
-- Para AWS Lambda, usa las URLs de los túneles Cloudflare en `.env.production`
+- Para AWS Lambda, usa las URLs de los túneles Cloudflare en `.env`
 
 
 ### APIs Locales
