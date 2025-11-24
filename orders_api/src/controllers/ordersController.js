@@ -369,7 +369,7 @@ export async function cancelOrder(req, res) {
             const now = new Date();
             const diffMinutes = (now - confirmedAt) / (1000 * 60);
 
-            if (diffMinutes > 1) {
+            if (diffMinutes > 10) {
                 await connection.rollback();
                 return res.status(400).json({
                     message: 'Cannot cancel confirmed order after 10 minutes'
