@@ -340,3 +340,8 @@ curl http://localhost:3002/api/products/1
 - El `JWT_SECRET` debe coincidir en todos los servicios para que funcione la autenticación
 - Para producción real, las APIs deberían estar en servidores públicos (EC2, ECS, Fargate, etc.)
 - **Despliegue a AWS:** Usa el archivo `.env` con las URLs públicas de Cloudflare
+
+### Importar colección de Postman
+1. **Abrir Postman** y hacer clic en **Import** (esquina superior izquierda)
+2. **Seleccionar archivo**: Arrastra el archivo `postman_collection.json` o haz clic en **Choose Files** y selecciónalo
+3. Tendrá una colección llamada "Jelou Tech Test - Orders System" y endpoints con ejemplos.
