@@ -66,7 +66,7 @@ echo "=== Customers API ===" && docker logs cloudflared-customers 2>&1 | grep "t
 echo "=== Orders API ===" && docker logs cloudflared-orders 2>&1 | grep "trycloudflare.com"
 # En este caso se usó cloudflared dado que en su versión gratuita permite más de un túnel en ejecución, mientras que ngrok solo permite 1.
 
-# 3. Actualizar lambda-orchestrator/.env.production con las URLs obtenidas
+# 3. Actualizar lambda-orchestrator/.env.example con las URLs obtenidas
 # Edita el archivo manualmente con las URLs del paso anterior:
 # CUSTOMERS_API_URL=https://tu-url-customers.trycloudflare.com
 # ORDERS_API_URL=https://tu-url-orders.trycloudflare.com
@@ -305,8 +305,7 @@ curl http://localhost:3002/api/products/1
 │   │   └── handler.js       # Generación JWT para servicios
 │   ├── scripts/
 │   │   └── generate-jwt.js  # Generación JWT para testing
-│   ├── .env                 # Local
-│   ├── .env.production      # AWS
+│   ├── .env                 # Local/AWS
 │   ├── serverless.yml
 │   ├── README.md
 │   └── package.json
@@ -335,4 +334,4 @@ curl http://localhost:3002/api/products/1
 - Los túneles de Cloudflare generan URLs temporales que cambian al reiniciar
 - El `JWT_SECRET` debe coincidir en todos los servicios para que funcione la autenticación
 - Para producción real, las APIs deberían estar en servidores públicos (EC2, ECS, Fargate, etc.)
-- **Despliegue a AWS:** Usa el archivo `.env.production` con las URLs públicas de Cloudflare
+- **Despliegue a AWS:** Usa el archivo `.env` con las URLs públicas de Cloudflare
