@@ -168,7 +168,6 @@ PORT=3000
 
 **Importante**:
 - `JWT_SECRET` debe ser el mismo en todos los servicios para que la validación funcione
-- Para producción, usa un secreto fuerte y único (ej: generado con `openssl rand -hex 32`)
 - Para AWS Lambda, usa las URLs de los túneles Cloudflare en `.env.production`
 
 
