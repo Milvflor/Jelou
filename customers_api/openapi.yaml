@@ -1,0 +1,258 @@
+openapi: 3.0.0
+info:
+  title: Customers API
+  version: 1.0.0
+  description: API para gestión de clientes
+servers:
+  - url: http://localhost:3001
+    description: Servidor de desarrollo
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Alice Johnson
+        email:
+          type: string
+          format: email
+          example: alice@example.com
+        phone:
+          type: string
+          example: "0991234567"
+        created_at:
+          type: string
+          format: date-time
+    CustomerInput:
+      type: object
+      required:
+        - name
+        - email
+        - phone
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        phone:
+          type: string
+          example: "0999999999"
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Validation error
+        errors:
+          type: array
+          items:
+            type: object
+    PaginatedCustomers:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Customer"
+        nextCursor:
+          type: integer
+          nullable: true
+        hasMore:
+          type: boolean
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      tags:
+        - Health
+      responses:
+        "200":
+          description: Servicio funcionando correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: customers-api
+  /api/customers:
+    post:
+      summary: Crear un nuevo cliente
+      tags:
+        - Customers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "201":
+          description: Cliente creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "409":
+          description: Email ya existe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Buscar clientes con paginación
+      tags:
+        - Customers
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Buscar por nombre o email
+        - in: query
+          name: cursor
+          schema:
+            type: integer
+          description: ID del último registro para paginación
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Cantidad de registros por página
+      responses:
+        "200":
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedCustomers"
+  /api/customers/{id}:
+    get:
+      summary: Obtener cliente por ID
+      tags:
+        - Customers
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del cliente
+      responses:
+        "200":
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Actualizar cliente
+      tags:
+        - Customers
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "200":
+          description: Cliente actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: Error de validación
+        "404":
+          description: Cliente no encontrado
+        "409":
+          description: Email ya existe
+    delete:
+      summary: Eliminar cliente
+      tags:
+        - Customers
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del cliente
+      responses:
+        "204":
+          description: Cliente eliminado
+        "404":
+          description: Cliente no encontrado
+  /api/internal/customers/{id}:
+    get:
+      summary: Obtener cliente (endpoint interno)
+      description: Endpoint para uso interno entre servicios. Requiere JWT válido.
+      tags:
+        - Internal
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del cliente
+      responses:
+        "200":
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "401":
+          description: Token faltante o inválido
+        "403":
+          description: Token de servicio inválido
+        "404":
+          description: Cliente no encontrado
+tags: []

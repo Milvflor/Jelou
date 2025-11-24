@@ -1,0 +1,665 @@
+{
+	"info": {
+		"_postman_id": "49c7982b-9a91-4bba-b830-ec6838cb9c10",
+		"name": "Jelou Tech Test - Orders System",
+		"description": "Colección completa de APIs para el sistema de órdenes con Lambda Orchestrator, Customers API y Orders API. Incluye autenticación JWT automática entre servicios.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26330795",
+		"_collection_link": "https://universal-equinox-135443.postman.co/workspace/Team-Workspace~fa4e3fd8-473b-4d2c-8951-789122c57129/collection/26330795-49c7982b-9a91-4bba-b830-ec6838cb9c10?action=share&source=collection_link&creator=26330795"
+	},
+	"item": [
+		{
+			"name": "Lambda Orchestrator",
+			"item": [
+				{
+					"name": "Create and Confirm Order (Local)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_id\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"qty\": 2\n    }\n  ],\n  \"idempotency_key\": \"postman-test\",\n  \"correlation_id\": \"corr\"\n}"
+						},
+						"url": {
+							"raw": "{{lambda_url}}/create-and-confirm-order",
+							"host": [
+								"{{lambda_url}}"
+							],
+							"path": [
+								"create-and-confirm-order"
+							]
+						},
+						"description": "Crea y confirma una orden completa. El orchestrator valida el cliente, crea la orden y la confirma automáticamente. Genera JWTs internamente para comunicarse con las APIs."
+					},
+					"response": []
+				},
+				{
+					"name": "Create and Confirm Order (AWS)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_id\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"qty\": 2\n    }\n  ],\n  \"idempotency_key\": \"postman-aws\",\n  \"correlation_id\": \"corr-aws\"\n}"
+						},
+						"url": {
+							"raw": "{{lambda_aws_url}}/create-and-confirm-order",
+							"host": [
+								"{{lambda_aws_url}}"
+							],
+							"path": [
+								"create-and-confirm-order"
+							]
+						},
+						"description": "Mismo endpoint pero en AWS Lambda desplegado."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints del Lambda Orchestrator que coordina la creación y confirmación de órdenes."
+		},
+		{
+			"name": "Customers API",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{customers_api_url}}/api/health",
+							"host": [
+								"{{customers_api_url}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						},
+						"description": "Verifica que la API de clientes esté funcionando."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{customers_api_url}}/api/customers?search=alice",
+							"host": [
+								"{{customers_api_url}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "alice"
+								}
+							]
+						},
+						"description": "Busca clientes por nombre, email o teléfono."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{customers_api_url}}/api/customers/1",
+							"host": [
+								"{{customers_api_url}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"1"
+							]
+						},
+						"description": "Obtiene un cliente por ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Customer\",\n  \"email\": \"test{{$timestamp}}@example.com\",\n  \"phone\": \"0991234567\"\n}"
+						},
+						"url": {
+							"raw": "{{customers_api_url}}/api/customers",
+							"host": [
+								"{{customers_api_url}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						},
+						"description": "Crea un nuevo cliente."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Customer",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\",\n  \"phone\": \"0999999999\"\n}"
+						},
+						"url": {
+							"raw": "{{customers_api_url}}/api/customers/3",
+							"host": [
+								"{{customers_api_url}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"3"
+							]
+						},
+						"description": "Actualiza un cliente existente."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Customer",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{customers_api_url}}/api/customers/3",
+							"host": [
+								"{{customers_api_url}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"3"
+							]
+						},
+						"description": "Elimina un cliente (soft delete)."
+					},
+					"response": []
+				},
+				{
+					"name": "Internal - Get Customer (JWT Required)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoic2VydmljZSIsInNlcnZpY2UiOiJwb3N0bWFuLXRlc3QiLCJpYXQiOjE3NjQwMTk2NjEsImV4cCI6MTc2NDEwNjA2MX0.lo5z1Kd04AhSmG05ydFPyorF7tIl0iH5vPezBZK91BE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT generado automáticamente por los servicios"
+							}
+						],
+						"url": {
+							"raw": "{{customers_api_url}}/api/internal/customers/1",
+							"host": [
+								"{{customers_api_url}}"
+							],
+							"path": [
+								"api",
+								"internal",
+								"customers",
+								"1"
+							]
+						},
+						"description": "Endpoint interno protegido con JWT. Usado por Orders API y Lambda Orchestrator. Requiere token JWT válido con type='service'."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de la API de clientes."
+		},
+		{
+			"name": "Orders API",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{orders_api_url}}/api/health",
+							"host": [
+								"{{orders_api_url}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						},
+						"description": "Verifica que la API de órdenes esté funcionando."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{orders_api_url}}/api/products/1",
+							"host": [
+								"{{orders_api_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						},
+						"description": "Obtiene un producto por ID incluyendo stock disponible."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_id\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"qty\": 2\n    },\n    {\n      \"productId\": 2,\n      \"qty\": 1\n    }\n  ],\n  \"idempotency_key\": \"order-create-{{$timestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{orders_api_url}}/api/orders",
+							"host": [
+								"{{orders_api_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						},
+						"description": "Crea una orden en estado CREATED. Valida stock y cliente. Genera JWT internamente para validar cliente."
+					},
+					"response": []
+				},
+				{
+					"name": "List Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{orders_api_url}}/api/orders",
+							"host": [
+								"{{orders_api_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						},
+						"description": "Lista todas las órdenes."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{orders_api_url}}/api/orders/1",
+							"host": [
+								"{{orders_api_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"1"
+							]
+						},
+						"description": "Obtiene una orden con todos sus items."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Idempotency-Key",
+								"value": "confirm-{{$timestamp}}",
+								"description": "Clave de idempotencia requerida"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{orders_api_url}}/api/orders/1/confirm",
+							"host": [
+								"{{orders_api_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"1",
+								"confirm"
+							]
+						},
+						"description": "Confirma una orden. Requiere header X-Idempotency-Key. Cambia estado a CONFIRMED y establece confirmed_at."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{orders_api_url}}/api/orders/3/cancel",
+							"host": [
+								"{{orders_api_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"3",
+								"cancel"
+							]
+						},
+						"description": "Cancela una orden. CREATED: siempre se puede cancelar. CONFIRMED: solo dentro de 10 minutos desde confirmed_at. Restaura stock automáticamente."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de la API de órdenes y productos."
+		},
+		{
+			"name": "Testing Scenarios",
+			"item": [
+				{
+					"name": "E2E - Create, Confirm and Cancel Order",
+					"item": [
+						{
+							"name": "1. Create Order via Orchestrator",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"pm.test(\"Order is CONFIRMED\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.order.status).to.eql(\"CONFIRMED\");",
+											"    pm.environment.set(\"order_id\", jsonData.data.order.id);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{JWTSECRET}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customer_id\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"qty\": 2\n    }\n  ],\n  \"idempotency_key\": \"e2e-test\",\n  \"correlation_id\": \"corr-e2e\"\n}"
+								},
+								"url": {
+									"raw": "{{lambda_url}}/create-and-confirm-order",
+									"host": [
+										"{{lambda_url}}"
+									],
+									"path": [
+										"create-and-confirm-order"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "2. Get Order Details",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Order has items\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.items).to.be.an('array');",
+											"    pm.expect(jsonData.items.length).to.be.above(0);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{orders_api_url}}/api/orders/{{order_id}}",
+									"host": [
+										"{{orders_api_url}}"
+									],
+									"path": [
+										"api",
+										"orders",
+										"{{order_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3. Cancel Order",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Order is CANCELED\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.status).to.eql(\"CANCELED\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{orders_api_url}}/api/orders/{{order_id}}/cancel",
+									"host": [
+										"{{orders_api_url}}"
+									],
+									"path": [
+										"api",
+										"orders",
+										"{{order_id}}",
+										"cancel"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "4. Verify Stock Restored",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Stock is available\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.stock_qty).to.be.above(0);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{orders_api_url}}/api/products/1",
+									"host": [
+										"{{orders_api_url}}"
+									],
+									"path": [
+										"api",
+										"products",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Flujo completo end-to-end: crear orden via orchestrator, verificar, cancelar y verificar que se restauró el stock."
+				}
+			],
+			"description": "Escenarios de prueba completos con assertions."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "lambda_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "customers_api_url",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "orders_api_url",
+			"value": "http://localhost:3002",
+			"type": "string"
+		},
+		{
+			"key": "lambda_aws_url",
+			"value": "https://4z6a4159x3.execute-api.us-east-1.amazonaws.com",
+			"type": "string"
+		},
+		{
+			"key": "jwt_secret",
+			"value": "your_jwt_secret_key_change_in_production",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "JWTSECRET",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

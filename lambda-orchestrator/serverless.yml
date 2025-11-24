@@ -1,0 +1,30 @@
+service: lambda-orchestrator
+
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: us-east-1
+  environment:
+    CUSTOMERS_API_URL: ${env:CUSTOMERS_API_URL}
+    ORDERS_API_URL: ${env:ORDERS_API_URL}
+    JWT_SECRET: ${env:JWT_SECRET}
+
+useDotenv: true
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    lambdaPort: 3005
+
+functions:
+  orchestrateOrder:
+    handler: src/handler.orchestrateOrder
+    timeout: 29
+    events:
+      - httpApi:
+          path: /create-and-confirm-order
+          method: post

@@ -1,0 +1,483 @@
+openapi: 3.0.0
+info:
+  title: Orders API
+  version: 1.0.0
+  description: API para gestión de productos y órdenes
+servers:
+  - url: http://localhost:3002
+    description: Servidor de desarrollo
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        sku:
+          type: string
+          example: SKU-1001
+        name:
+          type: string
+          example: Smartphone Galaxy S24
+        price_cents:
+          type: integer
+          example: 850000
+        stock:
+          type: integer
+          example: 50
+        created_at:
+          type: string
+          format: date-time
+    ProductInput:
+      type: object
+      required:
+        - sku
+        - name
+        - price_cents
+        - stock
+      properties:
+        sku:
+          type: string
+          example: SKU-5001
+        name:
+          type: string
+          example: Keyboard
+        price_cents:
+          type: integer
+          example: 50000
+        stock:
+          type: integer
+          example: 100
+    ProductUpdate:
+      type: object
+      properties:
+        price_cents:
+          type: integer
+          example: 55000
+        stock:
+          type: integer
+          example: 75
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        customer_id:
+          type: integer
+          example: 1
+        status:
+          type: string
+          enum:
+            - CREATED
+            - CONFIRMED
+            - CANCELED
+          example: CONFIRMED
+        total_cents:
+          type: integer
+          example: 1700000
+        created_at:
+          type: string
+          format: date-time
+    OrderWithItems:
+      allOf:
+        - $ref: "#/components/schemas/Order"
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/OrderItem"
+    OrderItem:
+      type: object
+      properties:
+        product_id:
+          type: integer
+          example: 1
+        qty:
+          type: integer
+          example: 2
+        unit_price_cents:
+          type: integer
+          example: 850000
+        subtotal_cents:
+          type: integer
+          example: 1700000
+        name:
+          type: string
+          example: Smartphone Galaxy S24
+        sku:
+          type: string
+          example: SKU-1001
+    OrderInput:
+      type: object
+      required:
+        - customer_id
+        - items
+      properties:
+        customer_id:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - productId
+              - qty
+            properties:
+              productId:
+                type: integer
+                example: 1
+              qty:
+                type: integer
+                minimum: 1
+                example: 2
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Validation error
+        errors:
+          type: array
+          items:
+            type: object
+    PaginatedProducts:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        nextCursor:
+          type: integer
+          nullable: true
+        hasMore:
+          type: boolean
+    PaginatedOrders:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        nextCursor:
+          type: integer
+          nullable: true
+        hasMore:
+          type: boolean
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      tags:
+        - Health
+      responses:
+        "200":
+          description: Servicio funcionando correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: orders-api
+  /api/products:
+    post:
+      summary: Crear un nuevo producto
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Producto creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "409":
+          description: SKU ya existe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Buscar productos con paginación
+      tags:
+        - Products
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Buscar por SKU o nombre
+        - in: query
+          name: cursor
+          schema:
+            type: integer
+          description: ID del último registro para paginación
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Cantidad de registros por página
+      responses:
+        "200":
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedProducts"
+  /api/products/{id}:
+    patch:
+      summary: Actualizar precio y/o stock de un producto
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Obtener producto por ID
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del producto
+      responses:
+        "200":
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/orders:
+    post:
+      summary: Crear una nueva orden
+      description: Crea una orden en estado CREATED. Valida que el cliente exista y
+        que haya stock suficiente.
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Orden creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Error de validación o stock insuficiente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+    get:
+      summary: Buscar órdenes con filtros y paginación
+      tags:
+        - Orders
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - CREATED
+              - CONFIRMED
+              - CANCELED
+          description: Filtrar por estado
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          description: Fecha desde (created_at >= from)
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+          description: Fecha hasta (created_at <= to)
+        - in: query
+          name: cursor
+          schema:
+            type: integer
+          description: ID del último registro para paginación
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Cantidad de registros por página
+      responses:
+        "200":
+          description: Lista de órdenes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedOrders"
+  /api/orders/{id}:
+    get:
+      summary: Obtener orden por ID con sus items
+      tags:
+        - Orders
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID de la orden
+      responses:
+        "200":
+          description: Orden encontrada con items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderWithItems"
+        "404":
+          description: Orden no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/orders/{id}/confirm:
+    post:
+      summary: Confirmar una orden
+      description: Cambia el estado de CREATED a CONFIRMED. Requiere header
+        X-Idempotency-Key para garantizar idempotencia.
+      tags:
+        - Orders
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID de la orden
+        - in: header
+          name: X-Idempotency-Key
+          required: true
+          schema:
+            type: string
+          description: Clave única para idempotencia
+      responses:
+        "200":
+          description: Orden confirmada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Falta X-Idempotency-Key o la orden no está en estado CREATED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Orden no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/orders/{id}/cancel:
+    post:
+      summary: Cancelar una orden
+      description: |
+        Cancela una orden y restaura el stock de los productos.
+        - CREATED: se puede cancelar siempre
+        - CONFIRMED: solo dentro de 10 minutos desde confirmación
+        - CANCELED: ya está cancelada (idempotente)
+      tags:
+        - Orders
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID de la orden
+      responses:
+        "200":
+          description: Orden cancelada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: No se puede cancelar (más de 10 minutos desde confirmación)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Orden no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+tags: []

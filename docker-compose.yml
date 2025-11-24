@@ -1,0 +1,80 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: tech-test-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tech_test
+    ports:
+      - "3306:3306"
+    volumes:
+      # Inicialización automática: crea la BD, tablas y datos de ejemplo
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/1_schema.sql
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/2_seed.sql
+    command: >
+      mysqld
+        --default-authentication-plugin=mysql_native_password
+        --character-set-server=utf8mb4
+        --collation-server=utf8mb4_unicode_ci
+  customers_api:
+    build:
+      context: ./customers_api
+    container_name: customers-api
+    restart: unless-stopped
+    environment:
+      - PORT=3001
+      - JWT_SECRET=your_jwt_secret_key_change_in_production
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=tech_test
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    volumes:
+      - ./customers_api:/usr/src/app
+  orders_api:
+    build:
+      context: ./orders_api
+    container_name: orders-api
+    restart: unless-stopped
+    environment:
+      - PORT=3002
+      - JWT_SECRET=your_jwt_secret_key_change_in_production
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=tech_test
+      - CUSTOMERS_API_URL=http://customers_api:3001
+    ports:
+      - "3002:3002"
+    depends_on:
+      - db
+    volumes:
+      - ./orders_api:/usr/src/app
+
+  # Túneles Cloudflare para ambas APIs
+  cloudflared-customers:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-customers
+    restart: unless-stopped
+    command: tunnel --url http://customers_api:3001
+    depends_on:
+      - customers_api
+    profiles:
+      - tunnels
+
+  cloudflared-orders:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-orders
+    restart: unless-stopped
+    command: tunnel --url http://orders_api:3002
+    depends_on:
+      - orders_api
+    profiles:
+      - tunnels
+

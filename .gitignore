@@ -1,0 +1,6 @@
+
+
+# Eliminar archivos de configuración del entorno
+.env
+.env.production
+.env.development
