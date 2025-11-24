@@ -76,12 +76,17 @@ curl https://tu-url-customers.trycloudflare.com/api/health
 curl https://tu-url-orders.trycloudflare.com/api/health
 
 # 5. Deploy a AWS con variables de producción
+
 cd lambda-orchestrator
 npm install
+
 # Temporalmente usa .env.example para el deploy
 cp .env .env.backup
 cp .env.example .env
-npx serverless@3 deploy
+
+# Deploy (ejecuta predeploy que genera JWT automáticamente)
+npm run deploy
+
 # Restaura .env para desarrollo local
 mv .env.backup .env
 
